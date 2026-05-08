@@ -3,7 +3,7 @@ import { Inter } from "next/font/google"
 
 import { SiteShell } from "@/components/site-shell"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
 export const metadata = {
   metadataBase: new URL("https://liyincode.github.io"),
@@ -38,7 +38,7 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <SiteShell locale="en" fontClassName={inter.className}>
+      <SiteShell locale="en" fontClassName={inter.variable}>
         {children}
       </SiteShell>
     </html>

@@ -6,9 +6,13 @@ export default function Home() {
 
   return (
     <div className="prose prose-stone dark:prose-invert">
+      <h1 className="sr-only">Young&apos;s Blog</h1>
+      {posts.length === 0 && (
+        <p className="text-slate-600 dark:text-slate-300">暂无文章。</p>
+      )}
       {posts.map((post) => (
         <article key={post.slug} className="my-10 first:mt-0 last:mb-0">
-          <h2 className="mb-1">
+          <h2 className="mt-0 mb-1.5 text-[22px] font-semibold leading-snug">
             <Link href={post.slug} className="no-underline hover:underline">
               {post.title}
             </Link>
@@ -20,7 +24,7 @@ export default function Home() {
             {formatDate(post.date, "zh")}
           </time>
           {post.description && (
-            <p className="mt-0 text-slate-600 dark:text-slate-300">
+            <p className="mt-0 mb-0 text-[15px] leading-7 text-slate-600 dark:text-slate-300">
               {post.description}
             </p>
           )}

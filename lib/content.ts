@@ -6,6 +6,13 @@ const contentDir = path.join(process.cwd(), "content")
 export const locales = ["zh", "en"] as const
 export type Locale = (typeof locales)[number]
 
+interface ContentIndex {
+  pages: Page[]
+  posts: Post[]
+}
+
+let contentIndex: ContentIndex | null = null
+
 interface BaseContent {
   locale: Locale
   slug: string
@@ -81,29 +88,14 @@ function readContentFile(
 }
 
 export function getAllPosts(locale: Locale = "zh"): Post[] {
-  return getMdxFiles(path.join(contentDir, "posts"))
-    .map((filePath) => {
-      const post = readContentFile("posts", filePath)
-
-      return {
-        ...post,
-        slug: getPostSlug(post.locale, post.slugAsParams),
-      }
-    })
+  return getContentIndex()
+    .posts
     .filter((post) => post.locale === locale)
-    .sort((a, b) => b.date.localeCompare(a.date))
 }
 
 export function getAllPages(locale: Locale = "zh"): Page[] {
-  return getMdxFiles(path.join(contentDir, "pages"))
-    .map((filePath) => {
-      const page = readContentFile("pages", filePath)
-
-      return {
-        ...page,
-        slug: getPageSlug(page.locale, page.slugAsParams),
-      }
-    })
+  return getContentIndex()
+    .pages
     .filter((page) => page.locale === locale)
 }
 
@@ -138,6 +130,71 @@ export function getPostAlternates(slugAsParams: string) {
 
 export function getPageAlternates(slugAsParams: string) {
   return getAlternates("pages", slugAsParams)
+}
+
+export function getLanguageSwitchMap() {
+  const switches: Record<string, string> = {
+    "/": "/en",
+    "/en": "/",
+  }
+
+  for (const post of getAllPosts("zh")) {
+    const englishPost = getPost(post.slugAsParams, "en")
+
+    if (englishPost) {
+      switches[post.slug] = englishPost.slug
+      switches[englishPost.slug] = post.slug
+    }
+  }
+
+  for (const page of getAllPages("zh")) {
+    const englishPage = getPage(page.slugAsParams, "en")
+
+    if (englishPage) {
+      switches[page.slug] = englishPage.slug
+      switches[englishPage.slug] = page.slug
+    }
+  }
+
+  return switches
+}
+
+function getContentIndex() {
+  if (process.env.NODE_ENV !== "development" && contentIndex) {
+    return contentIndex
+  }
+
+  const index = readContentIndex()
+
+  if (process.env.NODE_ENV !== "development") {
+    contentIndex = index
+  }
+
+  return index
+}
+
+function readContentIndex() {
+  const posts = getMdxFiles(path.join(contentDir, "posts"))
+    .map((filePath) => {
+      const post = readContentFile("posts", filePath)
+
+      return {
+        ...post,
+        slug: getPostSlug(post.locale, post.slugAsParams),
+      }
+    })
+    .sort((a, b) => b.date.localeCompare(a.date))
+
+  const pages = getMdxFiles(path.join(contentDir, "pages")).map((filePath) => {
+    const page = readContentFile("pages", filePath)
+
+    return {
+      ...page,
+      slug: getPageSlug(page.locale, page.slugAsParams),
+    }
+  })
+
+  return { posts, pages }
 }
 
 function getAlternates(collection: "posts" | "pages", slugAsParams: string) {
@@ -180,8 +237,16 @@ function requireDate(value: unknown, filePath: string) {
 
   const date = requireString(value, "date", filePath)
 
-  if (Number.isNaN(Date.parse(date))) {
-    throw new Error(`${filePath} has invalid "date" front matter`)
+  const parsedDate = new Date(`${date}T00:00:00.000Z`)
+
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+    Number.isNaN(parsedDate.valueOf()) ||
+    parsedDate.toISOString().slice(0, 10) !== date
+  ) {
+    throw new Error(
+      `${filePath} has invalid "date" front matter. Use YYYY-MM-DD.`,
+    )
   }
 
   return date

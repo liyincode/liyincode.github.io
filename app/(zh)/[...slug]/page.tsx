@@ -64,14 +64,12 @@ export default async function PagePage({ params }: PageProps) {
 
   return (
     <article className="py-6 prose prose-stone dark:prose-invert">
-      <h1 className="mb-2 text-3xl leading-tight">{page.title}</h1>
-      {page.description && (
-        <p className="mt-0 mb-2 text-base text-slate-600 dark:text-slate-300">
-          {page.description}
-        </p>
-      )}
-      <hr />
-      <Mdx source={page.body} />
+      <h1 className="mb-2 text-[30px] font-semibold leading-tight">
+        {page.title}
+      </h1>
+      <div className="mt-8 [&>*:first-child]:mt-0">
+        <Mdx source={page.body} />
+      </div>
     </article>
   )
 }

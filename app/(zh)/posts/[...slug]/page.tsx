@@ -70,20 +70,18 @@ export default async function PostPage({ params }: PostProps) {
 
   return (
     <article className="py-6 prose prose-stone dark:prose-invert">
-      <h1 className="mb-2 text-3xl leading-tight">{post.title}</h1>
-      {post.description && (
-        <p className="mt-0 mb-2 text-base text-slate-600 dark:text-slate-300">
-          {post.description}
-        </p>
-      )}
+      <h1 className="mb-2 text-[30px] font-semibold leading-tight">
+        {post.title}
+      </h1>
       <time
         dateTime={post.date}
-        className="block text-sm text-slate-500 dark:text-slate-400"
+        className="mb-8 block text-sm text-slate-500 dark:text-slate-400"
       >
         {formatDate(post.date, "zh")}
       </time>
-      <hr className="my-6" />
-      <Mdx source={post.body} />
+      <div className="[&>*:first-child]:mt-0">
+        <Mdx source={post.body} />
+      </div>
     </article>
   )
 }
