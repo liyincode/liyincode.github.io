@@ -1,12 +1,12 @@
 # My Blog
 
-A personal blog built with Next.js 15 and Contentlayer.
+A personal blog built with Next.js 16 and local MDX files.
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **Styling**: Tailwind CSS v4
-- **Content Management**: Contentlayer 2
+- **Content Management**: MDX with gray-matter and next-mdx-remote
 - **Language**: TypeScript
 - **Theme**: next-themes (Dark mode support)
 

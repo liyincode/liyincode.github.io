@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation"
 import { Metadata } from "next"
-import { allPages } from "contentlayer/generated"
 
 import { Mdx } from "@/components/mdx-components"
+import { getAllPages, getPage } from "@/lib/content"
 
 interface PageProps {
   params: Promise<{
@@ -13,7 +13,7 @@ interface PageProps {
 async function getPageFromParams(params: PageProps["params"]) {
   const { slug } = await params
   const slugString = slug?.join("/")
-  const page = allPages.find((page) => page.slugAsParams === slugString)
+  const page = getPage(slugString)
 
   if (!page) {
     return null
@@ -38,7 +38,7 @@ export async function generateMetadata({
 }
 
 export async function generateStaticParams() {
-  return allPages.map((page) => ({
+  return getAllPages().map((page) => ({
     slug: page.slugAsParams.split("/"),
   }))
 }
@@ -55,7 +55,7 @@ export default async function PagePage({ params }: PageProps) {
       <h1>{page.title}</h1>
       {page.description && <p className="text-xl">{page.description}</p>}
       <hr />
-      <Mdx code={page.body.code} />
+      <Mdx source={page.body} />
     </article>
   )
 }

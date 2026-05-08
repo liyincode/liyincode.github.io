@@ -1,11 +1,9 @@
-import { withContentlayer } from "next-contentlayer2";
-
 const nextConfig = {
   output: "export",
   reactStrictMode: true,
   images: {
     unoptimized: true,
   },
-} as const;
+} as const
 
-export default withContentlayer(nextConfig);
+export default nextConfig
