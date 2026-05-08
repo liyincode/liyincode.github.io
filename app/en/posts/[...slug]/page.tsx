@@ -2,7 +2,12 @@ import { notFound } from "next/navigation"
 
 import { Metadata } from "next"
 import { Mdx } from "@/components/mdx-components"
-import { getAllPosts, getPost } from "@/lib/content"
+import {
+  formatDate,
+  getAllPosts,
+  getPost,
+  getPostAlternates,
+} from "@/lib/content"
 
 interface PostProps {
   params: Promise<{
@@ -13,7 +18,7 @@ interface PostProps {
 async function getPostFromParams(params: PostProps["params"]) {
   const { slug } = await params
   const slugString = slug?.join("/")
-  const post = getPost(slugString)
+  const post = getPost(slugString, "en")
 
   if (!post) {
     return null
@@ -31,14 +36,27 @@ export async function generateMetadata({
     return {}
   }
 
+  const description = post.description ?? post.title
+
   return {
     title: post.title,
-    description: post.description,
+    description,
+    alternates: {
+      canonical: post.slug,
+      languages: getPostAlternates(post.slugAsParams),
+    },
+    openGraph: {
+      title: post.title,
+      description,
+      url: post.slug,
+      type: "article",
+      publishedTime: post.date,
+    },
   }
 }
 
 export async function generateStaticParams() {
-  return getAllPosts().map((post) => ({
+  return getAllPosts("en").map((post) => ({
     slug: post.slugAsParams.split("/"),
   }))
 }
@@ -51,14 +69,20 @@ export default async function PostPage({ params }: PostProps) {
   }
 
   return (
-    <article className="py-6 prose dark:prose-invert">
-      <h1 className="mb-2">{post.title}</h1>
+    <article className="py-6 prose prose-stone dark:prose-invert">
+      <h1 className="mb-2 text-3xl leading-tight">{post.title}</h1>
       {post.description && (
-        <p className="text-xl mt-0 text-slate-700 dark:text-slate-200">
+        <p className="mt-0 mb-2 text-base text-slate-600 dark:text-slate-300">
           {post.description}
         </p>
       )}
-      <hr className="my-4" />
+      <time
+        dateTime={post.date}
+        className="block text-sm text-slate-500 dark:text-slate-400"
+      >
+        {formatDate(post.date, "en")}
+      </time>
+      <hr className="my-6" />
       <Mdx source={post.body} />
     </article>
   )

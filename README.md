@@ -24,17 +24,26 @@ pnpm dev
 
 ## Adding Posts
 
-Create a `.mdx` file in `content/posts/`:
+Create a Chinese/default `.mdx` file in `content/posts/`:
 
 ```mdx
 ---
-title: Post Title
-description: Post description
+title: 文章标题
+description: 文章简介
 date: "2025-10-11"
 ---
 
-Your content here...
+正文内容...
 ```
+
+Add an English version with the same slug plus `.en`:
+
+```txt
+content/posts/my-post.mdx
+content/posts/my-post.en.mdx
+```
+
+The default post is available at `/posts/my-post`; the English post is available at `/en/posts/my-post`.
 
 ## Deployment
 

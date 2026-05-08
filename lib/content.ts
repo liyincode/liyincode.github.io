@@ -3,8 +3,11 @@ import path from "path"
 import matter from "gray-matter"
 
 const contentDir = path.join(process.cwd(), "content")
+export const locales = ["zh", "en"] as const
+export type Locale = (typeof locales)[number]
 
 interface BaseContent {
+  locale: Locale
   slug: string
   slugAsParams: string
   title: string
@@ -30,54 +33,156 @@ function getMdxFiles(dir: string): string[] {
   })
 }
 
-function getSlugAsParams(collection: "posts" | "pages", filePath: string) {
-  return path
+function getFileLocaleAndSlug(
+  collection: "posts" | "pages",
+  filePath: string,
+) {
+  const flattenedPath = path
     .relative(path.join(contentDir, collection), filePath)
     .replace(/\.mdx$/, "")
-    .split(path.sep)
-    .join("/")
+  const segments = flattenedPath.split(path.sep)
+  const fileName = segments.pop() ?? ""
+  const locale: Locale = fileName.endsWith(".en") ? "en" : "zh"
+  const cleanFileName =
+    locale === "en" ? fileName.replace(/\.en$/, "") : fileName
+  const slugAsParams = [...segments, cleanFileName].join("/")
+
+  return { locale, slugAsParams }
 }
 
-function readContentFile(collection: "posts" | "pages", filePath: string) {
+function readContentFile(collection: "posts", filePath: string): Omit<Post, "slug">
+function readContentFile(collection: "pages", filePath: string): Omit<Page, "slug">
+function readContentFile(
+  collection: "posts" | "pages",
+  filePath: string,
+): Omit<Post, "slug"> | Omit<Page, "slug"> {
   const source = readFileSync(filePath, "utf8")
   const { data, content } = matter(source)
-  const slugAsParams = getSlugAsParams(collection, filePath)
-
-  return {
+  const { locale, slugAsParams } = getFileLocaleAndSlug(collection, filePath)
+  const title = requireString(data.title, "title", filePath)
+  const description =
+    typeof data.description === "string" ? data.description : undefined
+  const base = {
+    locale,
     slugAsParams,
-    title: data.title,
-    description: data.description,
+    title,
+    description,
     body: content,
-    date: data.date,
   }
-}
 
-export function getAllPosts(): Post[] {
-  return getMdxFiles(path.join(contentDir, "posts")).map((filePath) => {
-    const post = readContentFile("posts", filePath)
-
+  if (collection === "posts") {
     return {
-      ...post,
-      slug: `/posts/${post.slugAsParams}`,
+      ...base,
+      date: requireDate(data.date, filePath),
     }
-  })
+  }
+
+  return base
 }
 
-export function getAllPages(): Page[] {
-  return getMdxFiles(path.join(contentDir, "pages")).map((filePath) => {
-    const page = readContentFile("pages", filePath)
+export function getAllPosts(locale: Locale = "zh"): Post[] {
+  return getMdxFiles(path.join(contentDir, "posts"))
+    .map((filePath) => {
+      const post = readContentFile("posts", filePath)
 
-    return {
-      ...page,
-      slug: `/${page.slugAsParams}`,
+      return {
+        ...post,
+        slug: getPostSlug(post.locale, post.slugAsParams),
+      }
+    })
+    .filter((post) => post.locale === locale)
+    .sort((a, b) => b.date.localeCompare(a.date))
+}
+
+export function getAllPages(locale: Locale = "zh"): Page[] {
+  return getMdxFiles(path.join(contentDir, "pages"))
+    .map((filePath) => {
+      const page = readContentFile("pages", filePath)
+
+      return {
+        ...page,
+        slug: getPageSlug(page.locale, page.slugAsParams),
+      }
+    })
+    .filter((page) => page.locale === locale)
+}
+
+export function getPost(slug: string, locale: Locale = "zh") {
+  return (
+    getAllPosts(locale).find((post) => post.slugAsParams === slug) ?? null
+  )
+}
+
+export function getPage(slug: string, locale: Locale = "zh") {
+  return (
+    getAllPages(locale).find((page) => page.slugAsParams === slug) ?? null
+  )
+}
+
+export function formatDate(date: string, locale: Locale = "zh") {
+  if (locale === "zh") {
+    return date
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  }).format(new Date(date))
+}
+
+export function getPostAlternates(slugAsParams: string) {
+  return getAlternates("posts", slugAsParams)
+}
+
+export function getPageAlternates(slugAsParams: string) {
+  return getAlternates("pages", slugAsParams)
+}
+
+function getAlternates(collection: "posts" | "pages", slugAsParams: string) {
+  const languages: Record<string, string> = {}
+
+  for (const locale of locales) {
+    const content =
+      collection === "posts"
+        ? getPost(slugAsParams, locale)
+        : getPage(slugAsParams, locale)
+
+    if (content) {
+      languages[locale === "zh" ? "zh-CN" : "en"] = content.slug
     }
-  })
+  }
+
+  return languages
 }
 
-export function getPost(slug: string) {
-  return getAllPosts().find((post) => post.slugAsParams === slug) ?? null
+function getPostSlug(locale: Locale, slugAsParams: string) {
+  return `${locale === "en" ? "/en" : ""}/posts/${slugAsParams}`
 }
 
-export function getPage(slug: string) {
-  return getAllPages().find((page) => page.slugAsParams === slug) ?? null
+function getPageSlug(locale: Locale, slugAsParams: string) {
+  return `${locale === "en" ? "/en" : ""}/${slugAsParams}`
+}
+
+function requireString(value: unknown, field: string, filePath: string) {
+  if (typeof value !== "string" || !value) {
+    throw new Error(`${filePath} is missing required "${field}" front matter`)
+  }
+
+  return value
+}
+
+function requireDate(value: unknown, filePath: string) {
+  if (value instanceof Date && !Number.isNaN(value.valueOf())) {
+    return value.toISOString().slice(0, 10)
+  }
+
+  const date = requireString(value, "date", filePath)
+
+  if (Number.isNaN(Date.parse(date))) {
+    throw new Error(`${filePath} has invalid "date" front matter`)
+  }
+
+  return date
 }

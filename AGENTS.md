@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This is a personal blog built with Next.js App Router, TypeScript, Tailwind CSS v4, and local MDX files. Route files live in `app/`, shared React components live in `components/`, content helpers live in `lib/`, and MDX content lives in `content/`. Use `content/posts/` for dated blog posts and `content/pages/` for standalone pages.
+This is a bilingual personal blog built with Next.js App Router, TypeScript, Tailwind CSS v4, and local MDX files. Route files live in `app/`, shared React components live in `components/`, content helpers live in `lib/`, and MDX content lives in `content/`. Use `content/posts/` for dated blog posts and `content/pages/` for standalone pages.
 
 ## Build, Test, and Development Commands
 
@@ -30,6 +30,8 @@ date: "2025-10-11"
 ```
 
 Pages under `content/pages/` require `title` and may include `description`. Keep slugs stable by renaming files only when the URL should change.
+
+Chinese/default content uses `name.mdx`; English content uses `name.en.mdx` with the same slug. For example, `content/posts/my-post.mdx` maps to `/posts/my-post`, and `content/posts/my-post.en.mdx` maps to `/en/posts/my-post`.
 
 ## Testing Guidelines
 

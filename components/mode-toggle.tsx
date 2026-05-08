@@ -8,7 +8,7 @@ export function ModeToggle() {
   return (
     <button
       onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-      className="border border-gray-200 rounded-md w-6 h-6 flex items-center justify-center">
+      className="inline-flex size-6 shrink-0 appearance-none items-center justify-center rounded-md border border-gray-200 bg-transparent p-0 align-middle leading-none text-slate-900 dark:border-slate-800 dark:text-slate-50">
       <span className="sr-only">Toggle mode</span>
       {theme !== "dark" ? (
         <svg
