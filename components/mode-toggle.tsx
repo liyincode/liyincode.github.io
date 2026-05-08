@@ -2,14 +2,21 @@
 
 import { useTheme } from "next-themes"
 
-export function ModeToggle() {
+import { siteConfig, type Locale } from "@/site.config"
+
+interface ModeToggleProps {
+  locale: Locale
+}
+
+export function ModeToggle({ locale }: ModeToggleProps) {
   const { resolvedTheme, setTheme } = useTheme()
   const isDark = resolvedTheme === "dark"
+  const labels = siteConfig.locales[locale].ui.themeToggle
 
   return (
     <button
       type="button"
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={isDark ? labels.light : labels.dark}
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className="inline-flex size-[26px] shrink-0 touch-manipulation appearance-none items-center justify-center rounded-md bg-transparent p-0 align-middle leading-none text-slate-900 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:text-slate-50 dark:hover:bg-slate-900 dark:focus-visible:ring-slate-600 dark:focus-visible:ring-offset-slate-950">
       {!isDark ? (

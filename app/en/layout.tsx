@@ -2,31 +2,32 @@ import "../globals.css"
 import { Inter } from "next/font/google"
 
 import { SiteShell } from "@/components/site-shell"
+import { absoluteUrl, siteConfig } from "@/site.config"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
 export const metadata = {
-  metadataBase: new URL("https://liyincode.github.io"),
+  metadataBase: new URL(siteConfig.url),
   title: {
-    default: "Young's Blog",
-    template: "%s | Young's Blog",
+    default: siteConfig.name,
+    template: `%s | ${siteConfig.name}`,
   },
-  description: "Young's Blog",
+  description: siteConfig.description,
   alternates: {
-    canonical: "/en",
+    canonical: siteConfig.locales.en.path,
     languages: {
-      "zh-CN": "/",
-      en: "/en",
+      [siteConfig.locales.zh.language]: siteConfig.locales.zh.path,
+      [siteConfig.locales.en.language]: siteConfig.locales.en.path,
     },
     types: {
-      "application/rss+xml": "/en/rss.xml",
+      "application/rss+xml": siteConfig.locales.en.rss,
     },
   },
   openGraph: {
-    title: "Young's Blog",
-    description: "Young's Blog",
-    url: "https://liyincode.github.io/en",
-    siteName: "Young's Blog",
+    title: siteConfig.name,
+    description: siteConfig.description,
+    url: absoluteUrl(siteConfig.locales.en.path),
+    siteName: siteConfig.name,
     type: "website",
   },
 }
@@ -37,7 +38,7 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={siteConfig.locales.en.language} suppressHydrationWarning>
       <SiteShell locale="en" fontClassName={inter.variable}>
         {children}
       </SiteShell>

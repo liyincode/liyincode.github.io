@@ -2,9 +2,10 @@ import { readdirSync, readFileSync } from "fs"
 import path from "path"
 import matter from "gray-matter"
 
+import { getLocalePrefix, locales, siteConfig, type Locale } from "@/site.config"
+
 const contentDir = path.join(process.cwd(), "content")
-export const locales = ["zh", "en"] as const
-export type Locale = (typeof locales)[number]
+export { locales, type Locale }
 
 interface ContentIndex {
   pages: Page[]
@@ -112,7 +113,7 @@ export function getPage(slug: string, locale: Locale = "zh") {
 }
 
 export function formatDate(date: string, locale: Locale = "zh") {
-  if (locale === "zh") {
+  if (locale === siteConfig.defaultLocale) {
     return date
   }
 
@@ -134,8 +135,8 @@ export function getPageAlternates(slugAsParams: string) {
 
 export function getLanguageSwitchMap() {
   const switches: Record<string, string> = {
-    "/": "/en",
-    "/en": "/",
+    [siteConfig.locales.zh.path]: siteConfig.locales.en.path,
+    [siteConfig.locales.en.path]: siteConfig.locales.zh.path,
   }
 
   for (const post of getAllPosts("zh")) {
@@ -207,7 +208,7 @@ function getAlternates(collection: "posts" | "pages", slugAsParams: string) {
         : getPage(slugAsParams, locale)
 
     if (content) {
-      languages[locale === "zh" ? "zh-CN" : "en"] = content.slug
+      languages[siteConfig.locales[locale].language] = content.slug
     }
   }
 
@@ -215,11 +216,11 @@ function getAlternates(collection: "posts" | "pages", slugAsParams: string) {
 }
 
 function getPostSlug(locale: Locale, slugAsParams: string) {
-  return `${locale === "en" ? "/en" : ""}/posts/${slugAsParams}`
+  return `${getLocalePrefix(locale)}/posts/${slugAsParams}`
 }
 
 function getPageSlug(locale: Locale, slugAsParams: string) {
-  return `${locale === "en" ? "/en" : ""}/${slugAsParams}`
+  return `${getLocalePrefix(locale)}/${slugAsParams}`
 }
 
 function requireString(value: unknown, field: string, filePath: string) {

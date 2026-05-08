@@ -1,14 +1,18 @@
 import { formatDate, getAllPosts } from "@/lib/content"
+import { siteConfig } from "@/site.config"
 import Link from "next/link"
 
 export default function Home() {
   const posts = getAllPosts("zh")
+  const localeConfig = siteConfig.locales.zh
 
   return (
     <div className="prose prose-stone dark:prose-invert">
-      <h1 className="sr-only">Young&apos;s Blog</h1>
+      <h1 className="sr-only">{siteConfig.name}</h1>
       {posts.length === 0 && (
-        <p className="text-slate-600 dark:text-slate-300">暂无文章。</p>
+        <p className="text-slate-600 dark:text-slate-300">
+          {localeConfig.ui.emptyPosts}
+        </p>
       )}
       {posts.map((post) => (
         <article key={post.slug} className="my-10 first:mt-0 last:mb-0">

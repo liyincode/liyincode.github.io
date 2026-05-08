@@ -1,6 +1,5 @@
 import { getAllPosts } from "@/lib/content"
-
-const siteUrl = "https://liyincode.github.io"
+import { absoluteUrl, siteConfig } from "@/site.config"
 
 export const dynamic = "force-static"
 
@@ -8,7 +7,7 @@ export function GET() {
   const posts = getAllPosts("zh")
   const items = posts
     .map((post) => {
-      const url = `${siteUrl}${post.slug}`
+      const url = absoluteUrl(post.slug)
 
       return `<item>
   <title>${escapeXml(post.title)}</title>
@@ -23,9 +22,9 @@ export function GET() {
   const rss = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0">
 <channel>
-  <title>Young's Blog</title>
-  <description>Young's Blog</description>
-  <link>${siteUrl}</link>
+  <title>${escapeXml(siteConfig.name)}</title>
+  <description>${escapeXml(siteConfig.description)}</description>
+  <link>${siteConfig.url}</link>
   ${items}
 </channel>
 </rss>`

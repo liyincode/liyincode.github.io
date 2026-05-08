@@ -6,46 +6,49 @@ import {
   getPageAlternates,
   getPostAlternates,
 } from "@/lib/content"
-
-const siteUrl = "https://liyincode.github.io"
+import { absoluteUrl, siteConfig } from "@/site.config"
 
 export const dynamic = "force-static"
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      url: siteUrl,
+      url: siteConfig.url,
       alternates: {
         languages: {
-          "zh-CN": siteUrl,
-          en: `${siteUrl}/en`,
+          [siteConfig.locales.zh.language]: siteConfig.url,
+          [siteConfig.locales.en.language]: absoluteUrl(
+            siteConfig.locales.en.path,
+          ),
         },
       },
     },
     {
-      url: `${siteUrl}/en`,
+      url: absoluteUrl(siteConfig.locales.en.path),
       alternates: {
         languages: {
-          "zh-CN": siteUrl,
-          en: `${siteUrl}/en`,
+          [siteConfig.locales.zh.language]: siteConfig.url,
+          [siteConfig.locales.en.language]: absoluteUrl(
+            siteConfig.locales.en.path,
+          ),
         },
       },
     },
     ...getAllPages("zh").map((page) => ({
-      url: `${siteUrl}${page.slug}`,
+      url: absoluteUrl(page.slug),
       alternates: getSitemapAlternates(getPageAlternates(page.slugAsParams)),
     })),
     ...getAllPages("en").map((page) => ({
-      url: `${siteUrl}${page.slug}`,
+      url: absoluteUrl(page.slug),
       alternates: getSitemapAlternates(getPageAlternates(page.slugAsParams)),
     })),
     ...getAllPosts("zh").map((post) => ({
-      url: `${siteUrl}${post.slug}`,
+      url: absoluteUrl(post.slug),
       lastModified: post.date,
       alternates: getSitemapAlternates(getPostAlternates(post.slugAsParams)),
     })),
     ...getAllPosts("en").map((post) => ({
-      url: `${siteUrl}${post.slug}`,
+      url: absoluteUrl(post.slug),
       lastModified: post.date,
       alternates: getSitemapAlternates(getPostAlternates(post.slugAsParams)),
     })),
@@ -57,7 +60,7 @@ function getSitemapAlternates(languages: Record<string, string>) {
     languages: Object.fromEntries(
       Object.entries(languages).map(([locale, pathname]) => [
         locale,
-        `${siteUrl}${pathname}`,
+        absoluteUrl(pathname),
       ]),
     ),
   }
