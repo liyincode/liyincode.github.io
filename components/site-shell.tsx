@@ -35,10 +35,10 @@ export function SiteShell({
         <div className="max-w-2xl mx-auto py-10 px-4">
           <header>
             <div className="flex items-center justify-between">
-              <nav className="text-sm font-medium">
+              <nav className="text-base font-semibold">
                 <Link href={homeHref}>Young&apos;s Blog</Link>
               </nav>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <LanguageSwitch links={languageSwitchLinks} />
                 <ModeToggle />
               </div>
